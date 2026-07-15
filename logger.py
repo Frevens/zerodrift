@@ -4,6 +4,7 @@ import math
 from datetime import datetime
 from typing import NotRequired, TypedDict
 
+
 class SpriteInfo(TypedDict):
     type: str
     pos: NotRequired[list[float]]
@@ -70,7 +71,6 @@ def log_state() -> None:
     frame = inspect.currentframe()
     if frame is None:
         return
-
     frame_back = frame.f_back
     if frame_back is None:
         return
@@ -89,19 +89,18 @@ def log_state() -> None:
         # 2) pygame.sprite.Group (or similar) -> sample sprites inside it
         if hasattr(value, "__class__") and "Group" in value.__class__.__name__:
             sprites_data: list[SpriteInfo] = []
-
             for i, sprite in enumerate(value):
                 if i >= _SPRITE_SAMPLE_LIMIT:
                     break
                 sprites_data.append(_build_sprite_info(sprite))
-
             game_state[key] = {"count": len(value), "sprites": sprites_data}
             continue
 
-        # 3) any standalone object with a `position` (boundary circle, escaping
-        # circle, float, etc.) -> log ALL of them, not just the first.
-        # This is the fix vs. the original Asteroids logger, which stopped
-        # after the first one because it only tracked a single `player`.
+        # 3) any standalone object with a `position` (boundary circle,
+        # escaping circle, floater, etc.) -> log ALL of them, not just the
+        # first. This is the fix vs. the original Asteroids logger, which
+        # stopped after the first one because it only tracked a single
+        # `player`.
         if hasattr(value, "position"):
             game_state[key] = _build_sprite_info(value)
 
@@ -117,7 +116,6 @@ def log_state() -> None:
     mode = "w" if not _state_log_initialized else "a"
     with open("game_state.jsonl", mode) as f:
         f.write(json.dumps(entry) + "\n")
-
     _state_log_initialized = True
 
 
@@ -125,7 +123,6 @@ def log_event(event_type: str, **details: object) -> None:
     global _event_log_initialized
 
     now = datetime.now()
-
     event: dict[str, object] = {
         "timestamp": now.strftime("%H:%M:%S.%f")[:-3],
         "elapsed_s": math.floor((now - _start_time).total_seconds()),
@@ -137,5 +134,4 @@ def log_event(event_type: str, **details: object) -> None:
     mode = "w" if not _event_log_initialized else "a"
     with open("game_events.jsonl", mode) as f:
         f.write(json.dumps(event) + "\n")
-
     _event_log_initialized = True
