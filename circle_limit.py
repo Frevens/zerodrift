@@ -1,7 +1,7 @@
 import pygame
 
 from circleshape import CircleShape
-from constants import CIRCLE_LIMIT_RADIUS, LINE_WIDTH, SCREEN_WIDTH, SCREEN_HEIGHT, FISH_RADIUS
+from constants import CIRCLE_LIMIT_RADIUS, LINE_WIDTH, SCREEN_WIDTH, SCREEN_HEIGHT
 
 
 class CircleLimit(CircleShape):
@@ -14,12 +14,18 @@ class CircleLimit(CircleShape):
 
     def contains(self, shape):
         distance = self.position.distance_to(shape.position)
-        return distance + shape.radius  <= self.radius + (FISH_RADIUS * 2 + 2)  # Se le da un margen de 2 + 2*FISH_RADIUS para que el pez no se vea "pegado" al borde
+        return distance + shape.radius <= self.radius
 
     def is_outside(self, shape):
         return not self.contains(shape)
 
-    def move_with_input(self, dt, keys, speed):
+    def has_escaped(self, shape):
+        """True solo cuando 'shape' ya PASÓ por completo el límite (los dos
+        círculos ya ni se tocan), no apenas cuando toca o cruza el borde."""
+        distance = self.position.distance_to(shape.position)
+        return distance - shape.radius > self.radius
+
+    def move_with_input(self, dt, keys, speed, max_y):
         """Fase de posicionamiento: el jugador mueve circle_limit con WASD.
         No puede salir de los bordes de la ventana."""
         if self.locked:
@@ -41,4 +47,5 @@ class CircleLimit(CircleShape):
         self.position += direction * speed * dt
 
         self.position.x = max(self.radius, min(SCREEN_WIDTH - self.radius, self.position.x))
-        self.position.y = max(self.radius, min(SCREEN_HEIGHT - self.radius, self.position.y))
+        self.position.y = max(self.radius, min(max_y - self.radius, self.position.y),
+)

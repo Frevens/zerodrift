@@ -10,13 +10,14 @@ from constants import (
     MIN_BITE_TIME,
     MAX_BITE_TIME,
     GAME_DURATION,
-    ROD_LENGTH,
 )
 from logger import log_state, log_event
 from rod import Rod
 from fish import Fish
 from floater import Floater, get_input_direction
 from circle_limit import CircleLimit
+from sticky_man import StickyMan
+from background import Background
 
 # --- Estados del juego ---
 POSITIONING = "positioning"   # jugador mueve circle_limit con WASD, confirma con SPACE
@@ -53,19 +54,45 @@ def main():
     Floater.containers = (drawable,)    # ídem
     CircleLimit.containers = (drawable,)
     Rod.containers = (drawable,)
+    StickyMan.containers = (drawable,)
 
-    rod_base = pygame.Vector2(SCREEN_WIDTH / 2, SCREEN_HEIGHT - 40)
+    background = Background(
+        SCREEN_WIDTH,
+        SCREEN_HEIGHT,
+        SCREEN_HEIGHT - 90,
+    )
+
+
+
+    sticky_man = StickyMan(
+        SCREEN_WIDTH / 2,
+        SCREEN_HEIGHT - 25,
+    )
 
     def reset_round():
-        circle_limit = CircleLimit(SCREEN_WIDTH / 2, SCREEN_HEIGHT / 2)
-        rod = Rod(rod_base.x, rod_base.y)
-        floater = Floater(rod_base.x, rod_base.y)
+        circle_limit = CircleLimit(
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT / 2,
+        )
+
+        rod = Rod(
+            SCREEN_WIDTH / 2,
+            SCREEN_HEIGHT - 50,
+        )
+
+        floater = Floater(
+            rod.tip_position().x,
+            rod.tip_position().y,
+        )
+
         rod.floater = floater
+
         return circle_limit, rod, floater
 
     circle_limit, rod, floater = reset_round()
-    fish = None
 
+    sticky_man.rod = rod
+    fish = None
     state = POSITIONING
     state_timer = 0.0
     bite_wait = 0.0
@@ -95,10 +122,20 @@ def main():
                     state_timer = 0.0
 
         keys = pygame.key.get_pressed()
+        background.update(dt)
+        # El rod es puramente decorativo, pero mantiene sus propios
+        # controles (A/D rota, W/S extiende/retrae) en todo momento.
+        rod.handle_input(keys, dt)
 
         # --- UPDATE por estado ---
         if state == POSITIONING:
-            circle_limit.move_with_input(dt, keys, CIRCLE_LIMIT_SPEED)
+            floater.position = rod.tip_position()
+            circle_limit.move_with_input(
+                dt,
+                keys,
+                CIRCLE_LIMIT_SPEED,
+                background.shoreline_y,
+            )
 
         elif state == CASTING:
             state_timer += dt
@@ -124,7 +161,7 @@ def main():
 
             game_time_left -= dt
 
-            if circle_limit.is_outside(fish):
+            if circle_limit.has_escaped(fish):
                 state = LOST
                 result_message = "¡El pez escapó!"
                 log_event("fish_escaped", position=list(fish.position))
@@ -137,8 +174,10 @@ def main():
 
         # --- DRAW ---
         screen.fill("black")
-        circle_limit.draw(screen)
+        background.draw(screen)
+        StickyMan.draw(sticky_man, screen)
         rod.draw(screen)
+        circle_limit.draw(screen)
         floater.draw(screen)
         if fish is not None and state in (PLAYING, WON, LOST):
             fish.draw(screen)

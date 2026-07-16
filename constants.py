@@ -27,8 +27,12 @@ FLOATER_SPEED = 60
 # --- CircleLimit (fase de posicionamiento previa al juego) ---
 CIRCLE_LIMIT_SPEED = 220
 
-# --- Rod (decorativo) ---
-ROD_LENGTH = 150  # largo visual de la caña
+# --- Rod (decorativo: A/D rota, W/S extiende/retrae) ---
+ROD_MIN_LENGTH = 60
+ROD_MAX_LENGTH = 220
+ROD_TURN_SPEED = 90    # grados/seg
+ROD_LENGTH_SPEED = 150  # px/seg
+ROD_MAX_ANGLE = 110
 
 # --- Partida ---
 GAME_DURATION = 20.0     # segundos que hay que aguantar dentro de circle_limit para ganar
