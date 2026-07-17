@@ -6,19 +6,16 @@ Zero Drift is a first personal project built as part of the boot.dev curriculum,
 
 Zero Drift is a simple 2D top-down fishing game built around two concentric circles sharing the same center:
 
-- **CircleLimit** is the maximum reach of the fishing line. It's fixed and never moves.
-- **Fish** constantly tries to drift away from the center, out toward (and past) that limit.
+- **CircleLimit** is the maximum reach of the fishing line. It's fixed and never moves. It uses the same CircleShape as parent class from Ateroids.
+- **Fish** constantly tries to drift away from the center, out toward (and past) that limit. The class shape is, also, a CircleShape child.
 
-The player's job is to keep the fish from breaking free, by reacting to its movement. Controls are `WASD`, which rotate the fishing rod left and right.
+The player's job is to keep the fish from breaking free by crossing outside of CircleLimit, by reacting to its movement. Controls are `WASD`. Fish's erratic movements and speed. You only have one speed, which can slow down, speed up or pull the fish.  
 
 The other pieces on screen:
 
 - **Floater** sits on top of the fish while the fish is within the line's reach, moving together with it. Once the fish reaches the edge of CircleLimit, the floater gets pinned there and can't go any further.
 - **Line** is just a straight line rendered from the tip of the rod to the floater's center — it has no state of its own, it's purely visual.
-- **Rod** pivots around its base, rotating within a 120° range in response to `A`/`D` input. It only rotates (no separate "raise the rod" animation) to keep things simple.
-
-**Escape condition:** while the fish is inside CircleLimit, it and the floater move together. Once the fish crosses CircleLimit, the floater stays pinned at the edge — if the fish then drifts far enough that the distance between it and the pinned floater exceeds the fish's own radius, it has broken free from the line. That triggers a message and resets the casting animation.
-
+- **Rod** pivots rotating within a range in response to `A`/`D` input. `W`/`S` raises and lower the rod.
 
 
 ## Project structure
